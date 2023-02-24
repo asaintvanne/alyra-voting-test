@@ -75,7 +75,7 @@ contract("Voting", accounts => {
         });
     });
 
-    context("Workflow", () => {
+    context("Workflow transitions", () => {
 
         //Test illegal status transitions from status given in argument
         function checkIllegalTransitions(currentStatus) {
@@ -287,6 +287,61 @@ contract("Voting", accounts => {
         });
     });
 
+    context("Workflow restrictions on operations", () => {
+
+        before(async () => {
+            VotingInstance = await Voting.new({from: _owner});
+        });
+
+        it("Illegal operations on RegisteringVoters status fail", async () => {
+            await VotingInstance.addVoter(_voter1, {from: _owner});
+            
+            await expectRevert(VotingInstance.addProposal("Proposal 1", {from: _voter1}), "Proposals are not allowed yet");
+
+            //setVote should fail, but as we cannot register proposal in RegisteringVoters because any proposal exists, it fails for another reason 
+            await expectRevert.unspecified(VotingInstance.setVote(0, {from: _voter1}));
+        });
+
+        it("Illegal operations on ProposalsRegistrationStarted status fail", async () => {
+            await VotingInstance.startProposalsRegistering({from: _owner});
+            await VotingInstance.addProposal("Proposal 1", {from: _voter1});
+
+            await expectRevert(VotingInstance.addVoter(_voter2, {from: _owner}), "Voters registration is not open yet");
+            await expectRevert(VotingInstance.setVote(1, {from: _voter1}), "Voting session havent started yet.");
+        });
+
+        it("Illegal operations on ProposalsRegistrationEnded status fail", async () => {
+            await VotingInstance.endProposalsRegistering({from: _owner});
+
+            await expectRevert(VotingInstance.addVoter(_voter2, {from: _owner}), "Voters registration is not open yet");
+            await expectRevert(VotingInstance.addProposal("Proposal 2", {from: _voter1}), "Proposals are not allowed yet");
+            await expectRevert(VotingInstance.setVote(1, {from: _voter1}), "Voting session havent started yet.");
+        });
+
+        it("Illegal operations on VotingSessionStarted status fail", async () => {
+            await VotingInstance.startVotingSession({from: _owner});
+
+            await expectRevert(VotingInstance.addVoter(_voter2, {from: _owner}), "Voters registration is not open yet");
+            await expectRevert(VotingInstance.addProposal("Proposal 2", {from: _voter1}), "Proposals are not allowed yet");
+        });
+
+        it("Illegal operations on VotingSessionEnded status fail", async () => {
+            await VotingInstance.endVotingSession({from: _owner});
+
+            await expectRevert(VotingInstance.addVoter(_voter2, {from: _owner}), "Voters registration is not open yet");
+            await expectRevert(VotingInstance.addProposal("Proposal 2", {from: _voter1}), "Proposals are not allowed yet");
+            await expectRevert(VotingInstance.setVote(1, {from: _voter1}), "Voting session havent started yet.");
+        });
+
+        it("Illegal operations on VotesTallied status fail", async () => {
+            await VotingInstance.tallyVotes({from: _owner});
+
+            await expectRevert(VotingInstance.addVoter(_voter2, {from: _owner}), "Voters registration is not open yet");
+            await expectRevert(VotingInstance.addProposal("Proposal 2", {from: _voter1}), "Proposals are not allowed yet");
+            await expectRevert(VotingInstance.setVote(1, {from: _voter1}), "Voting session havent started yet");
+        });
+    });
+
     context("Operations", () => {
 
         describe("Voter registration", () => {
@@ -307,7 +362,6 @@ contract("Voting", accounts => {
                 expect(voter1.isRegistered).true;
                 expect(voter1.hasVoted).false;
                 expect(voter1.votedProposalId).to.be.bignumber.equal(new BN(0));
-
             });
 
             it("Voter double registration is forbiden", async () => {
