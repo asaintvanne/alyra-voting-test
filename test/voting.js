@@ -10,7 +10,7 @@ contract("Voting", accounts => {
     const _owner = accounts[0];
     const _voter1 = accounts[1];
     const _voter2 = accounts[2];
-    const _unknown = accounts[9]
+    const _unknown = accounts[9];
 
     const _statusEnum = Voting.WorkflowStatus;
 
@@ -18,7 +18,7 @@ contract("Voting", accounts => {
 
         before(async () => {
             VotingInstance = await Voting.new({from: _owner});
-        })
+        });
 
         it("Owner is deployer", async () => {
             const owner = await VotingInstance.owner.call();
@@ -37,6 +37,7 @@ contract("Voting", accounts => {
     });
 
     context("Getters", () => {
+        
         describe("getVoter", () => {
 
             before(async () => {
@@ -48,10 +49,12 @@ contract("Voting", accounts => {
                 await expectRevert(VotingInstance.getVoter(_voter1, {from: _unknown}), "You're not a voter");
             });
 
-            it("Get voters, registered and unregistered", async () => {
+            it("Get unregistered voter", async () => {
                 let voter = await VotingInstance.getVoter.call(_unknown, {from: _voter1});
                 expect(voter.isRegistered).equal(false);
+            });
 
+            it("Get registered voter", async () => {
                 voter = await VotingInstance.getVoter.call(_voter1, {from: _voter1});
                 expect(voter.isRegistered).equal(true);
             });
@@ -96,6 +99,7 @@ contract("Voting", accounts => {
         }
 
         describe("Transition from RegisteringVoters", () => {
+
             before(async () => {
                 VotingInstance = await Voting.new({from: _owner});
             });
@@ -124,10 +128,10 @@ contract("Voting", accounts => {
         });
 
         describe("Transition from ProposalsRegistrationStarted", () => {
+
             before(async () => {
                 VotingInstance = await Voting.new({from: _owner});
                 await VotingInstance.startProposalsRegistering({from: _owner});
-
             });
 
             it("Only owner is allowed to change status", async () => {
@@ -220,15 +224,15 @@ contract("Voting", accounts => {
             });
 
             describe("Winner management", () => {
+
                 beforeEach(async () => {
                     VotingInstance = await Voting.new({from: _owner});
                     await VotingInstance.addVoter(_voter1, {from: _owner});
                     await VotingInstance.addVoter(_voter2, {from: _owner});
                     await VotingInstance.startProposalsRegistering({from: _owner});
-
                 });
 
-                it("Genesis proposal wins if no vote and no proposal", async () => {
+                it("Genesis proposal wins if no vote", async () => {
                     await VotingInstance.endProposalsRegistering({from: _owner});
                     await VotingInstance.startVotingSession({from: _owner});
                     await VotingInstance.endVotingSession({from: _owner});
@@ -295,7 +299,7 @@ contract("Voting", accounts => {
                 await expectRevert(VotingInstance.addVoter.call(_voter1, {from: _unknown}), "Ownable: caller is not the owner");
             });
 
-            it("Voter is successfully registred", async () => {
+            it("Voter registration is successful", async () => {
                 const result = await VotingInstance.addVoter(_voter1, {from: _owner});
                 await expectEvent(result, "VoterRegistered", {voterAddress: _voter1});
 
@@ -327,7 +331,7 @@ contract("Voting", accounts => {
                 await expectRevert(VotingInstance.addProposal.call("", {from: _voter1}), "Vous ne pouvez pas ne rien proposer");
             });
 
-            it("Proposal is successfully registered", async () => {
+            it("Proposal registeration is successful", async () => {
                 const result = await VotingInstance.addProposal("Proposal 1", {from: _voter1});
                 await expectEvent(result, "ProposalRegistered", {proposalId: new BN(1)});
 
@@ -360,7 +364,7 @@ contract("Voting", accounts => {
                 await expectRevert(VotingInstance.setVote.call(999999, {from: _voter1}), "Proposal not found");
             });
 
-            it("Vote is successfully registrated", async () => {
+            it("Vote registration is successful", async () => {
                 const voteProposalId = 1;
 
                 const proposal1BeforeVote = await VotingInstance.getOneProposal.call(voteProposalId, {from: _voter1});
@@ -376,7 +380,7 @@ contract("Voting", accounts => {
                 expect(proposal1AfterVote.voteCount).to.be.bignumber.equal(new BN(proposal1BeforeVote.voteCount).add(new BN(1)));
             });
             
-            it("Voter has already voted", async () => {
+            it("Multiple vote from same voter is forbiden", async () => {
                 await expectRevert(VotingInstance.setVote.call(0, {from: _voter1}), "You have already voted");
             });
         });
