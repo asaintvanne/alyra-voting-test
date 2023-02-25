@@ -34,6 +34,11 @@ contract("Voting", accounts => {
             await VotingInstance.addVoter(_voter1, {from: _owner});
             await expectRevert.unspecified(VotingInstance.getOneProposal.call(0, {from: _voter1}));
         });
+
+        it("Initial winningProposalID is 0", async () => {
+            const winningProposalID = await VotingInstance.winningProposalID.call();
+            expect(winningProposalID).to.be.bignumber.equal(new BN(0));
+        });
     });
 
     context("Getters", () => {
