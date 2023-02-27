@@ -53,7 +53,7 @@ truffle test --network yourNetwork
   * Transition to VotingSessionStarted is not allowed
   * Transition to VotingSessionEnded is not allowed
   * Transition to VotesTallied is not allowed
-- Transition to ProposalsRegistrationStarted is successful
+- Legal transition to ProposalsRegistrationStarted is successful
   * Genesis proposal is not created before status transition
   * Event WorkflowStatusChange is emitted with good parameters
   * Workflow status is correctly set
@@ -68,7 +68,7 @@ truffle test --network yourNetwork
   * Transition to VotingSessionStarted is not allowed
   * Transition to VotingSessionEnded is not allowed
   * Transition to VotesTallied is not allowed
-- Transition to ProposalsRegistrationEnded is successful
+- Legal transition to ProposalsRegistrationEnded is successful
   * Event WorkflowStatusChange is emitted with good parameters
   * Workflow status is correctly set
 
@@ -81,7 +81,7 @@ truffle test --network yourNetwork
   * Transition to ProposalsRegistrationEnded is not allowed
   * Transition to VotingSessionEnded is not allowed
   * Transition to VotesTallied is not allowed
-- Transition to VotingSessionStarted is successful
+- Legal transition to VotingSessionStarted is successful
   * Event WorkflowStatusChange is emitted with good parameters
   * Workflow status is correctly set
 
@@ -94,7 +94,7 @@ truffle test --network yourNetwork
   * Transition to ProposalsRegistrationEnded is not allowed
   * Transition to VotingSessionStarted is not allowed
   * Transition to VotesTallied is not allowed
-- Transition to VotingSessionEnded is successful
+- Legal transition to VotingSessionEnded is successful
   * Event WorkflowStatusChange is emitted with good parameters
   * Workflow status is correctly set
 
@@ -107,7 +107,7 @@ truffle test --network yourNetwork
   * Transition to ProposalsRegistrationEnded is not allowed
   * Transition to VotingSessionStarted is not allowed
   * Transition to VotingSessionEnded is not allowed
-- Transition to VotesTallied is successful
+- Legal transition to VotesTallied is successful
   * Event WorkflowStatusChange is emitted with good parameters
   * Workflow status is correctly set
 
